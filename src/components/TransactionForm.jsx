@@ -232,26 +232,28 @@ const TransactionForm = ({ initialType = 'sale', onSuccess, onInputFocus }) => {
                     )}
                     <label className="input-label" style={isPopup ? { color: 'var(--color-text-main)', marginBottom: '4px', fontSize: '0.85rem' } : { marginBottom: '4px', fontSize: '0.85rem' }}>Amount (₹)</label>
                     <input
-                        type="number"
-                        name="trx_amt_x8z" // Random name to defeat heuristics
+                        type="text" // 'number' type triggers autofill strip on Chrome. 'text' + inputMode is suppressed.
+                        name="trx_amt_x8z"
                         id="amount_field"
                         className={`input-field ${isPopup ? 'glass-input' : ''}`}
                         style={isPopup ? glassInputStyle : {}}
                         placeholder="0"
                         value={amount}
                         onChange={(e) => {
-                            setAmount(e.target.value);
-                            if (titleError) setTitleError(''); // Clear error on type
+                            const val = e.target.value;
+                            // Regex: Allow empty, numbers, and single decimal
+                            if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                setAmount(val);
+                                if (titleError) setTitleError('');
+                            }
                         }}
-                        min="0"
-                        step="0.01"
                         required
-                        autoFocus={isPopup} // Auto focus if in modal
+                        autoFocus={isPopup}
                         onFocus={() => onInputFocus?.()}
-                        inputMode="decimal" // Better mobile keyboard
-                        autoComplete="off" // Standard "off"
-                        role="presentation" // Semantic hint
-                        aria-autocomplete="none" // Accessibility hint
+                        inputMode="decimal" // Forces numeric keypad with dot
+                        pattern="[0-9]*"   // iOS fallback hint
+                        autoComplete="off"
+                        role="presentation"
                         autoCorrect="off"
                         autoCapitalize="off"
                         spellCheck="false"
