@@ -524,7 +524,7 @@ const Reports = ({ setCurrentView }) => {
                                                 <div style={{ fontWeight: '500', color: 'var(--color-text-main)' }}>{format(new Date(t.date), 'dd/MM')}</div>
                                                 <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>{format(new Date(t.date), 'h:mm a')}</div>
                                             </td>
-                                            <td style={{ padding: '12px 8px', verticalAlign: 'middle', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--color-text-main)' }}>
+                                            <td style={{ padding: '12px 8px', verticalAlign: 'middle', textAlign: 'center', whiteSpace: 'normal', wordBreak: 'break-word', color: 'var(--color-text-main)' }}>
                                                 {t.description}
                                             </td>
                                             <td style={{ padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle', fontWeight: '600' }}>
