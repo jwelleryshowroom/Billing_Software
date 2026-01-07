@@ -1,64 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Download, X } from 'lucide-react';
+import { useInstall } from '../context/useInstall';
 import { useTheme } from '../context/useTheme';
 import { useAuth } from '../context/useAuth';
 
 const InstallPrompt = () => {
-    const [deferredPrompt, setDeferredPrompt] = useState(null);
-    const [isVisible, setIsVisible] = useState(() => {
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-        if (isStandalone) return false;
-
-        const checkIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const checkSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        return (checkIOS || checkSafari);
-    });
+    const { deferredPrompt, promptInstall, isIOS, isStandalone } = useInstall();
+    const [startOpen, setStartOpen] = useState(false); // Local state to control visibility
     const { theme } = useTheme();
     const { user } = useAuth();
     const isDark = theme === 'dark';
 
-    const [isIOS] = useState(() => {
-        const checkIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const checkSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-        return (checkIOS || checkSafari) && !isStandalone;
-    });
+    // Show prompt automatically if available or if iOS (and not standalone)
+    // BUT only if we haven't dismissed it in this session? 
+    // For now, let's replicate the old behavior: show if we have a prompt OR if it's iOS.
 
     useEffect(() => {
-        console.log("InstallPrompt: Mounted");
+        if (deferredPrompt || isIOS) {
+            // Small delay to be polite
+            const timer = setTimeout(() => setStartOpen(true), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [deferredPrompt, isIOS]);
 
-        const handler = (e) => {
-            console.log("InstallPrompt: beforeinstallprompt event fired!");
-            // Prevent Chrome 67 and later from automatically showing the prompt
-            e.preventDefault();
-            // Stash the event so it can be triggered later.
-            setDeferredPrompt(e);
-            // Show the prompt
-            setIsVisible(true);
-            console.log("InstallPrompt: set to visible");
-        };
-
-        window.addEventListener('beforeinstallprompt', handler);
-
-        return () => window.removeEventListener('beforeinstallprompt', handler);
-    }, []);
-
-    const handleInstallClick = async () => {
-        if (!deferredPrompt) {
-            // Should theoretically not happen for Android/Chrome unless clicked manually
+    const handleInstallClick = () => {
+        if (isIOS) {
+            // No direct install API for iOS, just show instructions (already visible)
             return;
         }
-
-        // Show the install prompt
-        deferredPrompt.prompt();
-
-        // Wait for the user to respond to the prompt
-        await deferredPrompt.userChoice;
-
-        // We no longer need the prompt. Clear it and hide UI
-        setDeferredPrompt(null);
-        setIsVisible(false);
+        promptInstall();
+        setStartOpen(false); // Close after clicking
     };
+
+    // If it's already installed (standalone), don't show specific prompt
+    if (isStandalone) return null;
+
+    // If closed by user, don't show again in this session (unless refreshed)
+    if (!startOpen) return null;
+
+    if (!user) return null;
 
     if (!isVisible || !user) return null;
 
@@ -147,7 +127,7 @@ const InstallPrompt = () => {
                 )}
 
                 <button
-                    onClick={() => setIsVisible(false)}
+                    onClick={() => setStartOpen(false)}
                     style={{
                         background: 'transparent',
                         border: 'none',

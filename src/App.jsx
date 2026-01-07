@@ -5,6 +5,7 @@ import { useAuth } from './context/useAuth';
 import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { useTheme } from './context/useTheme';
+import { InstallProvider } from './context/InstallContext';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import { LayoutDashboard, FileBarChart } from 'lucide-react';
@@ -183,11 +184,13 @@ const AppContent = () => {
 function App() {
   return (
     <AuthProvider>
-      <ToastProvider>
-        <ThemeProvider>
-          <AppContent />
-        </ThemeProvider>
-      </ToastProvider>
+      <InstallProvider>
+        <ToastProvider>
+          <ThemeProvider>
+            <AppContent />
+          </ThemeProvider>
+        </ToastProvider>
+      </InstallProvider>
     </AuthProvider>
   );
 }

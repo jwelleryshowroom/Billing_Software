@@ -1,11 +1,13 @@
 import React from 'react';
 import { useTheme } from '../context/useTheme';
 import { useAuth } from '../context/useAuth';
+import { useInstall } from '../context/useInstall';
 import { Settings as SettingsIcon, Layout, Smartphone, ArrowLeft } from 'lucide-react';
 
 const Settings = ({ onClose }) => {
     const { dashboardMode, setDashboardMode } = useTheme();
     const { role: _role } = useAuth();
+    const { deferredPrompt, promptInstall, isIOS, isStandalone } = useInstall();
 
     return (
         <div style={{ padding: '0 4px', height: '100%', overflowY: 'auto' }}>
@@ -174,6 +176,38 @@ const Settings = ({ onClose }) => {
                     </p>
                 </div>
 
+
+
+                {/* Manual Install Button (if not installed) */}
+                {(!isStandalone) && (
+                    <div className="card" style={{ marginTop: '20px', padding: '16px', backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1rem', margin: '0 0 4px', color: 'var(--color-text-main)' }}>Install App</h3>
+                                <p style={{ fontSize: '0.8rem', margin: 0, color: 'var(--color-text-muted)' }}>
+                                    {isIOS ? 'Add to Home Screen for the best experience.' : 'Install for quick access and offline mode.'}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => isIOS ? alert("To install on iOS: Tap the Share button ⬆️ and select 'Add to Home Screen'.") : promptInstall()}
+                                disabled={!deferredPrompt && !isIOS}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: (!deferredPrompt && !isIOS) ? 'var(--color-text-muted)' : 'var(--color-primary)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontWeight: 600,
+                                    fontSize: '0.9rem',
+                                    cursor: (!deferredPrompt && !isIOS) ? 'not-allowed' : 'pointer',
+                                    opacity: (!deferredPrompt && !isIOS) ? 0.5 : 1
+                                }}
+                            >
+                                {isIOS ? 'How to?' : 'Install'}
+                            </button>
+                        </div>
+                    </div>
+                )}
 
             </div>
         </div>
