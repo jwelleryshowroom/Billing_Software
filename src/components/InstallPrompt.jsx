@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Download, X } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/useTheme';
+import { useAuth } from '../context/useAuth';
 
 const InstallPrompt = () => {
     const [deferredPrompt, setDeferredPrompt] = useState(null);
-    const [isVisible, setIsVisible] = useState(false);
+    const [isVisible, setIsVisible] = useState(() => {
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        if (isStandalone) return false;
+
+        const checkIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const checkSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        return (checkIOS || checkSafari);
+    });
     const { theme } = useTheme();
     const { user } = useAuth();
     const isDark = theme === 'dark';
 
-    const [isIOS, setIsIOS] = useState(false);
-
-    useEffect(() => {
-        // Detect iOS/Safari
+    const [isIOS] = useState(() => {
         const checkIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const checkSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        return (checkIOS || checkSafari) && !isStandalone;
+    });
 
-        if ((checkIOS || checkSafari) && !isStandalone) {
-            setIsIOS(true);
-            setIsVisible(true);
-        }
+    useEffect(() => {
 
         const handler = (e) => {
             // Prevent Chrome 67 and later from automatically showing the prompt
@@ -33,11 +36,6 @@ const InstallPrompt = () => {
         };
 
         window.addEventListener('beforeinstallprompt', handler);
-
-        // Check if already installed
-        if (isStandalone) {
-            setIsVisible(false);
-        }
 
         return () => window.removeEventListener('beforeinstallprompt', handler);
     }, []);
@@ -52,7 +50,7 @@ const InstallPrompt = () => {
         deferredPrompt.prompt();
 
         // Wait for the user to respond to the prompt
-        const { outcome } = await deferredPrompt.userChoice;
+        await deferredPrompt.userChoice;
 
         // We no longer need the prompt. Clear it and hide UI
         setDeferredPrompt(null);

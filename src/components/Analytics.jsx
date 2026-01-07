@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { useTransactions } from '../context/TransactionContext';
-import { useTheme } from '../context/ThemeContext';
+import { useTransactions } from '../context/useTransactions';
+import { useTheme } from '../context/useTheme';
 import {
     BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     Legend, PieChart, Pie, Cell

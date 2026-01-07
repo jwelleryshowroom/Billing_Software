@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { TransactionProvider } from './context/TransactionContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/useAuth';
 import { ToastProvider } from './context/ToastContext';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { useTheme } from './context/useTheme';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import { LayoutDashboard, FileBarChart } from 'lucide-react';

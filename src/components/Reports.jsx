@@ -1,9 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { useTransactions } from '../context/TransactionContext';
+import { useTransactions } from '../context/useTransactions';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, format, isSameDay } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { Download, BarChart2, Calendar as CalendarIcon, Inbox, PieChart as PieChartIcon } from 'lucide-react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -156,7 +154,7 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
-const EmptyState = ({ message }) => (
+const EmptyState = () => (
     <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -190,7 +188,6 @@ const Reports = ({ setCurrentView }) => {
     const { transactions, loading, setViewDateRange, currentRange } = useTransactions();
     const [view, setView] = useState('monthly'); // Default to monthly for performance
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [showChart, setShowChart] = useState(false);
     const [showCalendar, setShowCalendar] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
 
@@ -215,18 +212,6 @@ const Reports = ({ setCurrentView }) => {
         ).sort((a, b) => new Date(b.date) - new Date(a.date));
     }, [transactions, view, selectedDate]);
 
-    // Prepare data for chart
-    const chartData = useMemo(() => {
-        const groups = {};
-        reportData.slice().reverse().forEach(t => { // Reverse to show chronological left-to-right
-            const dateKey = format(new Date(t.date), 'dd/MM');
-            if (!groups[dateKey]) groups[dateKey] = { name: dateKey, sales: 0, expense: 0 };
-
-            if (t.type === 'sale') groups[dateKey].sales += t.amount;
-            else groups[dateKey].expense += t.amount;
-        });
-        return Object.values(groups);
-    }, [reportData]);
 
     // Helper to check for transaction on a specific date for calendar tile
     const hasTransaction = (date) => {
@@ -263,7 +248,7 @@ const Reports = ({ setCurrentView }) => {
         if (start.toISOString() !== currentRange.start.toISOString() || end.toISOString() !== currentRange.end.toISOString()) {
             setViewDateRange(start, end);
         }
-    }, [view, selectedDate, setViewDateRange]); // Intentionally omitting currentRange from dependency to avoid loop, though the check above handles it.
+    }, [view, selectedDate, setViewDateRange, currentRange.start, currentRange.end]);
 
     const toggleView = (newView) => {
         if (newView === 'daily') {

@@ -1,11 +1,11 @@
 import React from 'react';
-import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/useTheme';
+import { useAuth } from '../context/useAuth';
 import { Settings as SettingsIcon, Layout, Smartphone, ArrowLeft } from 'lucide-react';
 
 const Settings = ({ onClose }) => {
     const { dashboardMode, setDashboardMode } = useTheme();
-    const { role } = useAuth();
+    const { role: _role } = useAuth();
 
     return (
         <div style={{ padding: '0 4px', height: '100%', overflowY: 'auto' }}>

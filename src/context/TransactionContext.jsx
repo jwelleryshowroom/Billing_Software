@@ -1,18 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, writeBatch, getDocs, where } from 'firebase/firestore';
-import { useToast } from './ToastContext';
-import { startOfMonth, endOfMonth, parseISO, startOfDay, endOfDay } from 'date-fns';
-
-const TransactionContext = createContext();
-
-export const useTransactions = () => {
-    const context = useContext(TransactionContext);
-    if (!context) {
-        throw new Error('useTransactions must be used within a TransactionProvider');
-    }
-    return context;
-};
+import { useToast } from './useToast';
+import { startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
+import { TransactionContext } from './TransactionContextDef';
 
 export const TransactionProvider = ({ children }) => {
     const [transactions, setTransactions] = useState([]);
@@ -25,7 +16,6 @@ export const TransactionProvider = ({ children }) => {
     const { showToast } = useToast();
 
     useEffect(() => {
-        setLoading(true);
         // Optimized Listener: Only listen to the requested range
         const q = query(
             collection(db, 'transactions'),
@@ -54,8 +44,8 @@ export const TransactionProvider = ({ children }) => {
     }, [currentRange, showToast]);
 
     // Function to update the view (Components call this to switch context)
-    // Function to update the view (Components call this to switch context)
     const setViewDateRange = React.useCallback((startDate, endDate) => {
+        setLoading(true);
         // Ensure we cover the full day boundaries
         setCurrentRange({
             start: startOfDay(startDate),
@@ -85,7 +75,7 @@ export const TransactionProvider = ({ children }) => {
             await deleteDoc(doc(db, 'transactions', id));
 
             if (transactionToDelete) {
-                const { id, ...dataToRestore } = transactionToDelete;
+                const { id: _, ...dataToRestore } = transactionToDelete;
                 showToast("Transaction deleted.", "info", {
                     label: "UNDO",
                     onClick: () => addTransaction(dataToRestore) // Re-add clean data
@@ -107,49 +97,42 @@ export const TransactionProvider = ({ children }) => {
                 where('date', '<=', endDate)
             );
             const snapshot = await getDocs(q);
-
-            // Firestore Batch has a limit of 500 operations
-            const docs = snapshot.docs;
-            for (let i = 0; i < docs.length; i += 500) {
-                const batch = writeBatch(db);
-                const chunk = docs.slice(i, i + 500);
-                chunk.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-            }
+            const batch = writeBatch(db);
+            snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+            await batch.commit();
+            showToast(`Cleared ${snapshot.size} records.`, "success");
         } catch (error) {
-            console.error("Error batch deleting transactions:", error);
-            throw error;
+            console.error("Error deleting data range:", error);
+            showToast("Failed to clear data.", "error");
         }
     };
 
     const clearAllTransactions = async () => {
         try {
             const snapshot = await getDocs(collection(db, 'transactions'));
-            const docs = snapshot.docs;
-
-            for (let i = 0; i < docs.length; i += 500) {
-                const batch = writeBatch(db);
-                const chunk = docs.slice(i, i + 500);
-                chunk.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-            }
+            const batch = writeBatch(db);
+            snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+            await batch.commit();
+            showToast("Database wiped successfully.", "success");
         } catch (error) {
-            console.error("Error clearing all transactions:", error);
-            throw error;
+            console.error("Error clearing database:", error);
+            showToast("Failed to wipe database.", "error");
         }
     };
 
+    const value = {
+        transactions,
+        loading,
+        currentRange,
+        setViewDateRange,
+        addTransaction,
+        deleteTransaction,
+        deleteTransactionsByDateRange,
+        clearAllTransactions
+    };
+
     return (
-        <TransactionContext.Provider value={{
-            transactions,
-            addTransaction,
-            deleteTransaction,
-            deleteTransactionsByDateRange,
-            clearAllTransactions,
-            loading,
-            setViewDateRange, // New API
-            currentRange      // Expose current range state
-        }}>
+        <TransactionContext.Provider value={value}>
             {children}
         </TransactionContext.Provider>
     );

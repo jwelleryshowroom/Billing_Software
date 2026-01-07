@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useTransactions } from '../context/TransactionContext';
-import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
+import { useTransactions } from '../context/useTransactions';
+import { useAuth } from '../context/useAuth';
 import { format, parseISO, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, getISOWeek, getYear } from 'date-fns';
 import { Trash2, AlertTriangle, Calendar, ChevronRight, ChevronDown, CheckCircle2, ShieldAlert, ArrowLeft } from 'lucide-react';
 
@@ -94,7 +93,7 @@ const DataManagement = ({ onClose }) => {
                 );
             }
             setConfirmModal({ show: false, range: null, title: '', message: '' });
-        } catch (error) {
+        } catch {
             alert("Error deleting data.");
         }
         setLoading(false);

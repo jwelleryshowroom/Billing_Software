@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import { useTransactions } from '../context/TransactionContext';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import React, { useState } from 'react';
+import { useTransactions } from '../context/useTransactions';
+import { useAuth } from '../context/useAuth';
+import { useTheme } from '../context/useTheme';
 import {
     X, FileText, Download, Calendar,
     Zap, Settings as SettingsIcon, AlertCircle,
@@ -11,7 +11,7 @@ import {
 import {
     format, subDays, startOfDay, endOfDay,
     startOfMonth, endOfMonth, subMonths,
-    startOfYear, isWithinInterval, parseISO
+    startOfYear, isWithinInterval
 } from 'date-fns';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';

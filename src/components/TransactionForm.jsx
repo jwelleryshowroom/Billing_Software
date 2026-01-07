@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, MinusCircle, ShieldAlert } from 'lucide-react';
-import { useTransactions } from '../context/TransactionContext';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import { useTransactions } from '../context/useTransactions';
+import { useAuth } from '../context/useAuth';
+import { useTheme } from '../context/useTheme';
 
 const TransactionForm = ({ initialType = 'sale', onSuccess }) => {
     const { addTransaction, transactions } = useTransactions();

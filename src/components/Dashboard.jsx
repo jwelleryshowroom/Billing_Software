@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { useTransactions } from '../context/TransactionContext';
-import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
+import { useTransactions } from '../context/useTransactions';
+import { useTheme } from '../context/useTheme';
+import { useAuth } from '../context/useAuth';
 import TransactionForm from './TransactionForm';
 import Modal from './Modal';
 import { format } from 'date-fns';
@@ -109,7 +109,7 @@ const Dashboard = () => {
                                         position: 'relative',
                                         width: 'calc(100% - 20px)',
                                         margin: '10px',
-                                        padding: '10px',
+                                        padding: '20px',
                                         borderRadius: '24px',
                                         background: 'linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))',
                                         border: '1px solid rgba(16, 185, 129, 0.2)',
@@ -201,7 +201,7 @@ const Dashboard = () => {
             {!isOverviewExpanded && (
                 <div style={{
                     borderBottom: '1px solid var(--color-border)',
-                    marginBottom: '10px',
+                    marginBottom: '20px',
                     paddingBottom: '10px',
                     color: 'var(--color-text-muted)',
                     fontSize: '0.9rem',

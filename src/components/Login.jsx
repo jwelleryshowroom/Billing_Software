@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/useAuth';
+import { useTheme } from '../context/useTheme';
 import bgImage from '../assets/bakery_bg.png';
 
 const Login = () => {
