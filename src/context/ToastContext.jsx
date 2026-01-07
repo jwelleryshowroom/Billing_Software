@@ -80,11 +80,23 @@ export const ToastProvider = ({ children }) => {
                             )}
                             <button
                                 onClick={() => removeToast(toast.id)}
-                                style={{ padding: '4px', opacity: 0.9, cursor: 'pointer', transition: 'opacity 0.2s' }}
-                                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.9'}
+                                style={{
+                                    padding: '6px',
+                                    marginLeft: '8px',
+                                    borderRadius: '50%',
+                                    backgroundColor: toast.type === 'error' ? 'rgba(153, 27, 27, 0.1)' : toast.type === 'success' ? 'rgba(22, 101, 52, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+                                    color: 'inherit',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    border: 'none',
+                                    transition: 'background-color 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = toast.type === 'error' ? 'rgba(153, 27, 27, 0.2)' : toast.type === 'success' ? 'rgba(22, 101, 52, 0.2)' : 'rgba(255, 255, 255, 0.2)'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = toast.type === 'error' ? 'rgba(153, 27, 27, 0.1)' : toast.type === 'success' ? 'rgba(22, 101, 52, 0.1)' : 'rgba(255, 255, 255, 0.1)'}
                             >
-                                <X size={18} /> {/* Slightly larger for easier tapping */}
+                                <X size={16} strokeWidth={2.5} />
                             </button>
                         </div>
                     </div>
