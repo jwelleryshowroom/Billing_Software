@@ -289,11 +289,12 @@ const Dashboard = () => {
                                 <div
                                     key={t.id}
                                     style={{
-                                        padding: '12px 16px', // Compact padding
+                                        padding: '10px 16px', // Tighter padding requested
                                         borderBottom: index !== todaysTransactions.length - 1 ? '1px solid var(--color-border)' : 'none',
                                         display: 'flex',
                                         justifyContent: 'space-between',
-                                        alignItems: 'center'
+                                        alignItems: 'center',
+                                        minHeight: '60px' // Ensure fixed/consistent feel for rows
                                     }}
                                 >
                                     <div style={{ flex: 1, minWidth: 0, marginRight: '16px' }}>
@@ -304,7 +305,9 @@ const Dashboard = () => {
                                             WebkitLineClamp: 2,
                                             WebkitBoxOrient: 'vertical',
                                             overflow: 'hidden',
-                                            textOverflow: 'ellipsis'
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'normal', // Force wrapping
+                                            wordBreak: 'break-word' // Break long words if needed
                                         }}>
                                             {t.description}
                                         </div>
