@@ -96,104 +96,107 @@ const Dashboard = () => {
                             </div>
                         </div>
                     </div>
-
-                    {dashboardMode === 'inline' ? (
-                        <TransactionForm onInputFocus={() => setIsOverviewExpanded(false)} />
-                    ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                            <button
-                                onClick={() => handleOpenModal('sale')}
-                                className="btn-premium-hover"
-                                style={{
-                                    position: 'relative',
-                                    width: 'calc(100% - 20px)',
-                                    margin: '10px',
-                                    padding: '20px',
-                                    borderRadius: '24px',
-                                    background: 'linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))',
-                                    border: '1px solid rgba(16, 185, 129, 0.2)',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '12px',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 10px 30px -10px rgba(16, 185, 129, 0.3)',
-                                    overflow: 'hidden',
-                                    height: '160px',
-                                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                                    zIndex: 10
-                                }}
-                            >
-                                {/* Decorative Blob */}
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '-20%',
-                                    right: '-20%',
-                                    width: '100px',
-                                    height: '100px',
-                                    background: 'rgba(16, 185, 129, 0.2)',
-                                    filter: 'blur(40px)',
-                                    borderRadius: '50%'
-                                }} />
-
-                                <div style={{ fontSize: '3rem', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}>
-                                    🧁
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Daily Sale</div>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>Sell sweet treats</div>
-                                </div>
-                            </button>
-
-                            <button
-                                onClick={() => handleOpenModal('expense')}
-                                className="btn-premium-hover"
-                                style={{
-                                    position: 'relative',
-                                    width: 'calc(100% - 20px)',
-                                    margin: '10px',
-                                    padding: '20px',
-                                    borderRadius: '24px',
-                                    background: 'linear-gradient(145deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05))',
-                                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '12px',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 10px 30px -10px rgba(239, 68, 68, 0.3)',
-                                    overflow: 'hidden',
-                                    height: '160px',
-                                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                                    zIndex: 10
-                                }}
-                            >
-                                {/* Decorative Blob */}
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '-20%',
-                                    right: '-20%',
-                                    width: '100px',
-                                    height: '100px',
-                                    background: 'rgba(239, 68, 68, 0.2)',
-                                    filter: 'blur(40px)',
-                                    borderRadius: '50%'
-                                }} />
-
-                                <div style={{ fontSize: '3rem', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}>
-                                    💸
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Add Expense</div>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>Log spending</div>
-                                </div>
-                            </button>
-                        </div>
-                    )}
                 </div>
             )}
+
+            {/* Action Section - ALWAYS VISIBLE */}
+            <div style={{ marginBottom: '10px', flexShrink: 0 }}>
+                {dashboardMode === 'inline' ? (
+                    <TransactionForm onInputFocus={() => setIsOverviewExpanded(false)} />
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <button
+                            onClick={() => handleOpenModal('sale')}
+                            className="btn-premium-hover"
+                            style={{
+                                position: 'relative',
+                                width: 'calc(100% - 20px)',
+                                margin: '10px',
+                                padding: '20px',
+                                borderRadius: '24px',
+                                background: 'linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))',
+                                border: '1px solid rgba(16, 185, 129, 0.2)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '12px',
+                                cursor: 'pointer',
+                                boxShadow: '0 10px 30px -10px rgba(16, 185, 129, 0.3)',
+                                overflow: 'hidden',
+                                height: '160px',
+                                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                                zIndex: 10
+                            }}
+                        >
+                            {/* Decorative Blob */}
+                            <div style={{
+                                position: 'absolute',
+                                top: '-20%',
+                                right: '-20%',
+                                width: '100px',
+                                height: '100px',
+                                background: 'rgba(16, 185, 129, 0.2)',
+                                filter: 'blur(40px)',
+                                borderRadius: '50%'
+                            }} />
+
+                            <div style={{ fontSize: '3rem', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}>
+                                🧁
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Daily Sale</div>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>Sell sweet treats</div>
+                            </div>
+                        </button>
+
+                        <button
+                            onClick={() => handleOpenModal('expense')}
+                            className="btn-premium-hover"
+                            style={{
+                                position: 'relative',
+                                width: 'calc(100% - 20px)',
+                                margin: '10px',
+                                padding: '20px',
+                                borderRadius: '24px',
+                                background: 'linear-gradient(145deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05))',
+                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '12px',
+                                cursor: 'pointer',
+                                boxShadow: '0 10px 30px -10px rgba(239, 68, 68, 0.3)',
+                                overflow: 'hidden',
+                                height: '160px',
+                                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                                zIndex: 10
+                            }}
+                        >
+                            {/* Decorative Blob */}
+                            <div style={{
+                                position: 'absolute',
+                                top: '-20%',
+                                right: '-20%',
+                                width: '100px',
+                                height: '100px',
+                                background: 'rgba(239, 68, 68, 0.2)',
+                                filter: 'blur(40px)',
+                                borderRadius: '50%'
+                            }} />
+
+                            <div style={{ fontSize: '3rem', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}>
+                                💸
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Add Expense</div>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>Log spending</div>
+                            </div>
+                        </button>
+                    </div>
+                )}
+            </div>
 
             {/* Divider if collapsed */}
             {
