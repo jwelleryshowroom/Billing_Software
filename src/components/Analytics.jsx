@@ -42,6 +42,14 @@ const Analytics = ({ setCurrentView }) => {
         tooltipColor: isDark ? '#fff' : '#3E2723'
     };
 
+    // Compact Formatter for Y-Axis (e.g. 1.2k, 5k)
+    const formatCompact = (value) => {
+        if (value >= 1000) {
+            return `₹${(value / 1000).toLocaleString('en-IN', { maximumFractionDigits: 1 }).replace(/\.0$/, '')}k`;
+        }
+        return `₹${value}`;
+    };
+
     // Currency Formatter
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('en-IN', {
