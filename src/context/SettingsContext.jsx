@@ -18,7 +18,7 @@ export const SettingsProvider = ({ children }) => {
 
     // Icon Style: 'mono' | 'emoji'
     const [iconStyle, setIconStyle] = useState(() => {
-        return localStorage.getItem('iconStyle') || 'mono';
+        return localStorage.getItem('iconStyle') || 'emoji';
     });
 
     // Show Labels: boolean
@@ -27,11 +27,32 @@ export const SettingsProvider = ({ children }) => {
         return saved !== null ? JSON.parse(saved) : true;
     });
 
+    // Global Settings Drawer Visibility
+    const [isSettingsOpen, setIsSettingsOpen] = useState(() => {
+        const saved = localStorage.getItem('isSettingsOpen');
+        return saved !== null ? JSON.parse(saved) : false;
+    });
+    const openSettings = () => setIsSettingsOpen(true);
+    const closeSettings = () => setIsSettingsOpen(false);
+
+    // Haptic Debug Mode: boolean
+    const [hapticDebug, setHapticDebug] = useState(() => {
+        const saved = localStorage.getItem('hapticDebug');
+        return saved !== null ? JSON.parse(saved) : false; // Default to false (hidden)
+    });
+
+    // Global Data Drawer Visibility
+    const [isDataOpen, setIsDataOpen] = useState(false);
+    const openData = () => setIsDataOpen(true);
+    const closeData = () => setIsDataOpen(false);
+
     useEffect(() => {
         localStorage.setItem('menuBarMode', menuBarMode);
         localStorage.setItem('iconStyle', iconStyle);
         localStorage.setItem('showMenuLabels', JSON.stringify(showMenuLabels));
-    }, [menuBarMode, iconStyle, showMenuLabels]);
+        localStorage.setItem('hapticDebug', JSON.stringify(hapticDebug));
+        localStorage.setItem('isSettingsOpen', JSON.stringify(isSettingsOpen));
+    }, [menuBarMode, iconStyle, showMenuLabels, hapticDebug, isSettingsOpen]);
 
     const value = {
         menuBarMode,
@@ -39,7 +60,15 @@ export const SettingsProvider = ({ children }) => {
         iconStyle,
         setIconStyle,
         showMenuLabels,
-        setShowMenuLabels
+        setShowMenuLabels,
+        hapticDebug,
+        setHapticDebug,
+        isSettingsOpen,
+        openSettings,
+        closeSettings,
+        isDataOpen,
+        openData,
+        closeData
     };
 
     return (

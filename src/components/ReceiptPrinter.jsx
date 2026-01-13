@@ -45,19 +45,27 @@ const ReceiptPrinter = ({ transaction, type = 'TAX_INVOICE' }) => {
     const printStyle = `
         @media print {
             @page { size: auto; margin: 0mm; }
-            body * { visibility: hidden; }
-            #printable-receipt, #printable-receipt * { visibility: visible; }
+            body { 
+                visibility: hidden; 
+                overflow: hidden; 
+            }
             #printable-receipt { 
-                position: absolute; 
+                visibility: visible;
+                position: fixed; 
                 left: 0; 
                 top: 0; 
                 width: 79mm; 
+                height: auto;
                 padding: 1mm;
+                background: white;
+                z-index: 99999;
                 font-family: 'Courier New', monospace; 
                 margin: 0;
-                box-shadow: none; /* Remove shadow when printing */
+                box-shadow: none !important;
             }
-            /* Hide the action buttons explicitly, though body * hidden should catch them, this is safer */
+            #printable-receipt * { 
+                visibility: visible; 
+            }
             .no-print { display: none !important; }
         }
     `;
@@ -232,16 +240,20 @@ const ReceiptPrinter = ({ transaction, type = 'TAX_INVOICE' }) => {
                         <span>Total Amount:</span>
                         <span style={{ fontWeight: 'bold' }}>₹ {formatCurrency(transaction.totalValue || transaction.amount)}</span>
                     </div>
-                    <div>{SEPARATOR}</div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>ADVANCE PAID:</span>
-                        <span>₹ {formatCurrency(transaction.payment?.advance || transaction.advancePaid || 0)}</span>
-                    </div>
-                    <div>{SEPARATOR}</div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 'bold' }}>
-                        <span>⚠️ BALANCE DUE:</span>
-                        <span>₹ {formatCurrency(transaction.payment?.balance || transaction.balanceDue || 0)}</span>
-                    </div>
+                    {!transaction.payment?.balanceMethod && (
+                        <>
+                            <div>{SEPARATOR}</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>ADVANCE PAID:</span>
+                                <span>₹ {formatCurrency(transaction.payment?.advance || transaction.advancePaid || 0)}</span>
+                            </div>
+                            <div>{SEPARATOR}</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 'bold' }}>
+                                <span>⚠️ BALANCE DUE:</span>
+                                <span>₹ {formatCurrency(transaction.payment?.balance || transaction.balanceDue || 0)}</span>
+                            </div>
+                        </>
+                    )}
                     <div>{SEPARATOR}</div>
 
                     <div style={{ textAlign: 'center', marginTop: '5px' }}>

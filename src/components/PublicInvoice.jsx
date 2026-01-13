@@ -295,7 +295,7 @@ const PublicInvoice = () => {
                             <span>Subtotal</span>
                             <span>₹{formatCurrency(subtotal)}</span>
                         </div>
-                        {transaction.delivery && (
+                        {transaction.delivery && isBooking && (
                             <div className="total-row">
                                 <span>Delivery Due</span>
                                 <span>{new Date(transaction.delivery.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}{transaction.delivery.time && `, ${transaction.delivery.time}`}</span>
@@ -326,7 +326,7 @@ const PublicInvoice = () => {
                             )
                         )}
 
-                        {isOrderMode && (
+                        {isOrderMode && !transaction.payment?.balanceMethod && (
                             <>
                                 <div className="total-row" style={{ marginTop: '0.5rem', borderTop: '1px dashed #e5e7eb', paddingTop: '0.5rem' }}>
                                     <span>Advance Paid</span>

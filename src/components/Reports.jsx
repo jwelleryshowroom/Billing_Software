@@ -2,10 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { useTransactions } from '../context/useTransactions';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, format, isSameDay } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Download, BarChart2, Calendar as CalendarIcon, Inbox, PieChart as PieChartIcon } from 'lucide-react';
+import { Download, BarChart2, Calendar as CalendarIcon, Inbox, PieChart as PieChartIcon, ShoppingBag } from 'lucide-react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import ExportModal from './ExportModal';
+import { triggerHaptic } from '../utils/haptics';
 
 // Override some calendar styles
 const calendarStyles = `
@@ -136,16 +137,12 @@ const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
             <div style={{
-                backgroundColor: 'white',
-                padding: '12px',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-md)',
                 boxShadow: 'var(--shadow-md)',
                 fontSize: '0.85rem'
             }}>
                 <p style={{ margin: '0 0 4px', fontWeight: 'bold', color: 'var(--color-text-main)' }}>{label}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <span style={{ color: 'var(--color-success)' }}>Sales: ₹{payload[0].value}</span>
+                    <span style={{ color: 'var(--color-success)' }}>Sales & Orders: ₹{payload[0].value}</span>
                     <span style={{ color: 'var(--color-danger)' }}>Expense: ₹{payload[1].value}</span>
                 </div>
             </div>
@@ -187,6 +184,7 @@ const EmptyState = () => (
 const Reports = ({ setCurrentView }) => {
     const { transactions, loading, setViewDateRange, currentRange } = useTransactions();
     const [view, setView] = useState('monthly'); // Default to monthly for performance
+    const [viewType, setViewType] = useState('transactions'); // 'transactions' | 'items'
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
@@ -212,6 +210,33 @@ const Reports = ({ setCurrentView }) => {
         ).sort((a, b) => new Date(b.date) - new Date(a.date));
     }, [transactions, view, selectedDate]);
 
+    // Aggregate Item Sales Data
+    const itemSalesData = useMemo(() => {
+        const items = {};
+        reportData.forEach(tx => {
+            if (tx.type === 'sale' || tx.type === 'order') {
+                if (tx.items && Array.isArray(tx.items)) {
+                    tx.items.forEach(item => {
+                        const id = item.id || item.name; // Fallback
+                        if (!items[id]) {
+                            items[id] = {
+                                id,
+                                name: item.name,
+                                category: item.category || 'General',
+                                qty: 0,
+                                total: 0
+                            };
+                        }
+                        items[id].qty += Number(item.qty || 0);
+                        // Calculate total based on item price * qty (safest) or proportional split
+                        items[id].total += (Number(item.price || 0) * Number(item.qty || 0));
+                    });
+                }
+            }
+        });
+        return Object.values(items).sort((a, b) => b.total - a.total);
+    }, [reportData]);
+
 
     // Helper to check for transaction on a specific date for calendar tile
     const hasTransaction = (date) => {
@@ -219,6 +244,7 @@ const Reports = ({ setCurrentView }) => {
     };
 
     const handleDateChange = (date) => {
+        triggerHaptic('light');
         setSelectedDate(date);
         setView('daily');
         setShowCalendar(false); // Close calendar after selection
@@ -251,6 +277,7 @@ const Reports = ({ setCurrentView }) => {
     }, [view, selectedDate, setViewDateRange, currentRange.start, currentRange.end]);
 
     const toggleView = (newView) => {
+        triggerHaptic('light');
         if (newView === 'daily') {
             setShowCalendar(!showCalendar);
             if (view !== 'daily') setView('daily');
@@ -329,6 +356,7 @@ const Reports = ({ setCurrentView }) => {
             }}>
                 <button
                     onClick={() => {
+                        triggerHaptic('light');
                         setSelectedDate(new Date());
                         setView('daily');
                         setShowCalendar(false);
@@ -427,7 +455,10 @@ const Reports = ({ setCurrentView }) => {
                 <h3 className="reports-title">{getTitle()}</h3>
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <button
-                        onClick={() => setCurrentView('analytics')}
+                        onClick={() => {
+                            triggerHaptic('light');
+                            setCurrentView('analytics');
+                        }}
                         className="btn btn-premium-hover"
                         style={{
                             padding: '8px 12px',
@@ -445,7 +476,10 @@ const Reports = ({ setCurrentView }) => {
                         <PieChartIcon size={18} /> Analytics
                     </button>
                     <button
-                        onClick={() => setShowExportModal(true)}
+                        onClick={() => {
+                            triggerHaptic('light');
+                            setShowExportModal(true);
+                        }}
                         className="btn btn-premium-hover"
                         style={{
                             padding: '8px 12px',
@@ -463,6 +497,40 @@ const Reports = ({ setCurrentView }) => {
                         <Download size={18} /> Export
                     </button>
                 </div>
+            </div>
+
+            {/* View Type Toggle (Transactions / Items) */}
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', marginBottom: '0' }}>
+                <button
+                    onClick={() => { triggerHaptic('light'); setViewType('transactions'); }}
+                    style={{
+                        flex: 1,
+                        padding: '12px',
+                        background: viewType === 'transactions' ? 'var(--color-bg-surface)' : 'transparent',
+                        borderBottom: viewType === 'transactions' ? '2px solid var(--color-primary)' : 'none',
+                        color: viewType === 'transactions' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Transactions
+                </button>
+                <button
+                    onClick={() => { triggerHaptic('light'); setViewType('items'); }}
+                    style={{
+                        flex: 1,
+                        padding: '12px',
+                        background: viewType === 'items' ? 'var(--color-bg-surface)' : 'transparent',
+                        borderBottom: viewType === 'items' ? '2px solid var(--color-primary)' : 'none',
+                        color: viewType === 'items' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Item Sales
+                </button>
             </div>
 
             {/* Table Section (Flex 1) */}
@@ -488,9 +556,31 @@ const Reports = ({ setCurrentView }) => {
                                     padding: '16px 0'
                                 }}>
                                     {[
-                                        { label: 'Total Sales 🧁', value: reportData.reduce((acc, curr) => acc + (curr.type === 'sale' ? curr.amount : 0), 0), color: 'var(--color-success)', align: 'left', padding: '0 16px' },
-                                        { label: 'Total Expense 💸', value: reportData.reduce((acc, curr) => acc + (curr.type === 'expense' ? curr.amount : 0), 0), color: 'var(--color-danger)', align: 'center', padding: '0 8px' },
-                                        { label: 'Net Profit 💼', value: reportData.reduce((acc, curr) => acc + (curr.type === 'sale' ? curr.amount : -curr.amount), 0), color: 'var(--color-text-main)', align: 'right', padding: '0 16px' }
+                                        {
+                                            label: 'Total Sales 🧁',
+                                            value: reportData.reduce((acc, curr) => acc + ((curr.type === 'sale' || curr.type === 'order' || curr.type === 'settlement') ? curr.amount : 0), 0),
+                                            color: 'var(--color-success)',
+                                            align: 'left',
+                                            padding: '0 16px'
+                                        },
+                                        {
+                                            label: 'Total Expense 💸',
+                                            value: reportData.reduce((acc, curr) => acc + (curr.type === 'expense' ? curr.amount : 0), 0),
+                                            color: 'var(--color-danger)',
+                                            align: 'center',
+                                            padding: '0 8px'
+                                        },
+                                        {
+                                            label: 'Net Profit 💼',
+                                            value: reportData.reduce((acc, curr) => {
+                                                if (curr.type === 'sale' || curr.type === 'order' || curr.type === 'settlement') return acc + curr.amount;
+                                                if (curr.type === 'expense') return acc - curr.amount;
+                                                return acc;
+                                            }, 0),
+                                            color: 'var(--color-text-main)',
+                                            align: 'right',
+                                            padding: '0 16px'
+                                        }
                                     ].map((item, i) => (
                                         <div key={i} style={{ textAlign: item.align, padding: item.padding, whiteSpace: 'nowrap', overflow: 'hidden' }}>
                                             <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '4px', whiteSpace: 'nowrap' }}>{item.label}</div>
@@ -502,40 +592,81 @@ const Reports = ({ setCurrentView }) => {
                                 </div>
                             </div>
 
-                            <table style={{
-                                width: '100%',
-                                maxWidth: '600px',
-                                margin: '0 auto',
-                                borderCollapse: 'collapse',
-                                fontSize: '0.9rem',
-                                tableLayout: 'fixed'
-                            }}>
-                                <thead style={{ position: 'sticky', top: '75px', backgroundColor: 'var(--color-bg-surface)', zIndex: 5, boxShadow: '0 1px 0 var(--color-border)' }}>
-                                    <tr style={{ textAlign: 'left' }}>
-                                        <th style={{ padding: '12px 16px', width: '100px', color: 'var(--color-text-muted)', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date</th>
-                                        <th style={{ padding: '12px 8px', textAlign: 'center', color: 'var(--color-text-muted)', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Description</th>
-                                        <th style={{ padding: '12px 16px', textAlign: 'right', width: '125px', color: 'var(--color-text-muted)', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {reportData.map(t => (
-                                        <tr key={t.id} style={{ borderBottom: '1px solid var(--color-bg-body)', transition: 'background-color 0.2s' }}>
-                                            <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
-                                                <div style={{ fontWeight: '500', color: 'var(--color-text-main)' }}>{format(new Date(t.date), 'dd/MM')}</div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>{format(new Date(t.date), 'h:mm a')}</div>
-                                            </td>
-                                            <td style={{ padding: '12px 8px', verticalAlign: 'middle', textAlign: 'center', whiteSpace: 'normal', wordBreak: 'break-word', color: 'var(--color-text-main)' }}>
-                                                {t.description}
-                                            </td>
-                                            <td style={{ padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle', fontWeight: '600' }}>
-                                                <div style={{ color: t.type === 'sale' ? 'var(--color-success)' : 'var(--color-danger)' }}>
-                                                    {t.type === 'sale' ? '+' : '-'}₹{t.amount.toLocaleString()}
-                                                </div>
-                                            </td>
+                            {viewType === 'transactions' ? (
+                                <table style={{
+                                    width: '100%',
+                                    maxWidth: '600px',
+                                    margin: '0 auto',
+                                    borderCollapse: 'collapse',
+                                    fontSize: '0.9rem',
+                                    tableLayout: 'fixed'
+                                }}>
+                                    <thead style={{ position: 'sticky', top: '75px', backgroundColor: 'var(--color-bg-surface)', zIndex: 5, boxShadow: '0 1px 0 var(--color-border)' }}>
+                                        <tr style={{ textAlign: 'left' }}>
+                                            <th style={{ padding: '12px 16px', width: '100px', color: 'var(--color-text-muted)', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date</th>
+                                            <th style={{ padding: '12px 8px', textAlign: 'center', color: 'var(--color-text-muted)', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Description</th>
+                                            <th style={{ padding: '12px 16px', textAlign: 'right', width: '125px', color: 'var(--color-text-muted)', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Amount</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {reportData.map(t => (
+                                            <tr key={t.id} style={{ borderBottom: '1px solid var(--color-bg-body)', transition: 'background-color 0.2s' }}>
+                                                <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                                                    <div style={{ fontWeight: '500', color: 'var(--color-text-main)' }}>{format(new Date(t.date), 'dd/MM')}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>{format(new Date(t.date), 'h:mm a')}</div>
+                                                </td>
+                                                <td style={{ padding: '12px 8px', verticalAlign: 'middle', textAlign: 'center', whiteSpace: 'normal', wordBreak: 'break-word', color: 'var(--color-text-main)' }}>
+                                                    {t.description}
+                                                    {t.status === 'pending' && <span style={{ display: 'inline-block', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(255, 193, 7, 0.2)', color: 'var(--color-warning)', marginLeft: '6px' }}>Pending</span>}
+                                                </td>
+                                                <td style={{ padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle', fontWeight: '600' }}>
+                                                    <div style={{ color: (t.type === 'sale' || t.type === 'order' || t.type === 'settlement') ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                                                        {(t.type === 'sale' || t.type === 'order' || t.type === 'settlement') ? '+' : '-'}₹{t.amount.toLocaleString()}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            ) : (
+                                /* ITEM SALES TABLE */
+                                <table style={{
+                                    width: '100%',
+                                    maxWidth: '600px',
+                                    margin: '0 auto',
+                                    borderCollapse: 'collapse',
+                                    fontSize: '0.9rem',
+                                    tableLayout: 'fixed'
+                                }}>
+                                    <thead style={{ position: 'sticky', top: '75px', backgroundColor: 'var(--color-bg-surface)', zIndex: 5, boxShadow: '0 1px 0 var(--color-border)' }}>
+                                        <tr style={{ textAlign: 'left' }}>
+                                            <th style={{ padding: '12px 16px', width: '60%', color: 'var(--color-text-muted)', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Item</th>
+                                            <th style={{ padding: '12px 8px', textAlign: 'center', width: '15%', color: 'var(--color-text-muted)', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Qty</th>
+                                            <th style={{ padding: '12px 16px', textAlign: 'right', width: '25%', color: 'var(--color-text-muted)', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {itemSalesData.length > 0 ? itemSalesData.map((item, index) => (
+                                            <tr key={index} style={{ borderBottom: '1px solid var(--color-bg-body)', transition: 'background-color 0.2s' }}>
+                                                <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                                                    <div style={{ fontWeight: '500', color: 'var(--color-text-main)' }}>{item.name}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>{item.category}</div>
+                                                </td>
+                                                <td style={{ padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle', fontWeight: '500', color: 'var(--color-text-main)' }}>
+                                                    {item.qty}
+                                                </td>
+                                                <td style={{ padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle', fontWeight: '600', color: 'var(--color-success)' }}>
+                                                    ₹{item.total.toLocaleString()}
+                                                </td>
+                                            </tr>
+                                        )) : (
+                                            <tr>
+                                                <td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-muted)' }}>No item sales found for this period.</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            )}
                         </>
                     ) : (
                         !loading && <EmptyState message="No transactions for this range." />

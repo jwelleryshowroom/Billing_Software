@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import Layout from './Layout';
+import { useNavigate } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import { LayoutDashboard, FileBarChart } from 'lucide-react';
 import { useTheme } from '../context/useTheme';
+import { triggerHaptic } from '../utils/haptics';
 
 // Lazy Load Heavy Components
 const Reports = React.lazy(() => import('./Reports'));
 const Analytics = React.lazy(() => import('./Analytics'));
 const DataManagement = React.lazy(() => import('./DataManagement'));
-const Settings = React.lazy(() => import('./Settings'));
 
 // Simple Suspense Fallback
 const LoadingFallback = () => (
@@ -30,6 +31,18 @@ const Home = () => {
         localStorage.setItem('last_view', currentView);
     }, [currentView]);
 
+    const navigate = useNavigate();
+
+    // Redirection Logic: Desktop -> Billing (Once per session)
+    React.useEffect(() => {
+        const isDesktop = window.innerWidth > 768;
+        const hasRedirected = sessionStorage.getItem('desktop_redirect_done');
+
+        if (isDesktop && !hasRedirected) {
+            sessionStorage.setItem('desktop_redirect_done', 'true');
+            navigate('/billing');
+        }
+    }, [navigate]);
     const getGlow = () => theme === 'dark'
         ? '0 0 15px -4px rgba(255, 255, 255, 0.1)'
         : '0 0 20px -5px var(--color-primary-light), 0 4px 10px rgba(0,0,0,0.1)';
@@ -51,7 +64,10 @@ const Home = () => {
                 border: '1px solid var(--color-border)'
             }}>
                 <button
-                    onClick={() => setCurrentView('dashboard')}
+                    onClick={() => {
+                        triggerHaptic('light');
+                        setCurrentView('dashboard');
+                    }}
                     style={{
                         flex: 1,
                         padding: '12px 12px',
@@ -76,7 +92,10 @@ const Home = () => {
                 </button>
 
                 <button
-                    onClick={() => setCurrentView('reports')}
+                    onClick={() => {
+                        triggerHaptic('light');
+                        setCurrentView('reports');
+                    }}
                     style={{
                         flex: 1,
                         padding: '12px 12px',
@@ -110,9 +129,6 @@ const Home = () => {
                 <div className={`analytics-overlay ${currentView === 'analytics' ? 'active' : ''}`}>
                     {currentView === 'analytics' && <Analytics setCurrentView={setCurrentView} />}
                 </div>
-
-                {currentView === 'data' && <DataManagement onClose={() => setCurrentView('dashboard')} />}
-                {currentView === 'settings' && <Settings onClose={() => setCurrentView('dashboard')} />}
             </React.Suspense>
 
             <style>{`

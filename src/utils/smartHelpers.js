@@ -55,13 +55,32 @@ export const getSmartEmoji = (name, category) => {
         if (lowerName.includes(key)) return keywords[key];
     }
 
-    // Fallback by Category
-    if (lowerCat.includes('cake')) return '🎂';
-    if (lowerCat.includes('pastr')) return '🍰';
-    if (lowerCat.includes('snack')) return '🍔';
-    if (lowerCat.includes('drink') || lowerCat.includes('beverage')) return '🥤';
-    if (lowerCat.includes('party') || lowerCat.includes('deco')) return '🎉';
+    // Strict Match Only - No fuzzy fallbacks
+    return '';
+};
 
-    // Ultimate Fallback
-    return '📦';
+export const generateWhatsAppLink = (order) => {
+    const link = `${window.location.origin}/view/${order.id}`;
+    const phone = order.customer?.phone || '';
+
+    // Distinction Logic
+    const isBooking = order.type === 'order' && order.status !== 'completed' && order.status !== 'delivered';
+    const docType = isBooking ? 'BOOKING SLIP' : 'INVOICE';
+    const closeMsg = isBooking ? 'Order is subject to confirmation.' : 'Please visit us again! 🙏';
+
+    // Message Construction (Safe Emojis)
+    const message = `*THE CLASSIC CONFECTION* 🧁\n` +
+        `Hello *${order.customer?.name || 'Customer'}*,\n` +
+        `Here is your ${docType} for Order *#${order.id.slice(-6).toUpperCase()}*:\n` +
+        `${link}\n\n` +
+        `${closeMsg}`;
+
+    const encodedMessage = encodeURIComponent(message);
+
+    // Use api.whatsapp.com for better cross-platform compatibility
+    const url = phone
+        ? `https://api.whatsapp.com/send?phone=91${phone}&text=${encodedMessage}`
+        : `https://api.whatsapp.com/send?text=${encodedMessage}`;
+
+    return url;
 };

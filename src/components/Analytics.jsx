@@ -81,8 +81,8 @@ const Analytics = ({ setCurrentView }) => {
         filteredTransactions.forEach(t => {
             const dateKey = format(new Date(t.date), 'dd/MM');
             if (!groups[dateKey]) groups[dateKey] = { name: dateKey, sales: 0, expense: 0 };
-            if (t.type === 'sale') groups[dateKey].sales += t.amount;
-            else groups[dateKey].expense += t.amount;
+            if (t.type === 'sale' || t.type === 'order' || t.type === 'settlement') groups[dateKey].sales += t.amount;
+            else if (t.type === 'expense') groups[dateKey].expense += t.amount;
         });
         return Object.values(groups).reverse();
     }, [filteredTransactions]);
@@ -95,7 +95,7 @@ const Analytics = ({ setCurrentView }) => {
             sales: 0
         }));
 
-        filteredTransactions.filter(t => t.type === 'sale').forEach(t => {
+        filteredTransactions.filter(t => t.type === 'sale' || t.type === 'order').forEach(t => {
             const hour = new Date(t.date).getHours();
             hours[hour].sales += t.amount;
         });
@@ -106,10 +106,14 @@ const Analytics = ({ setCurrentView }) => {
     // 3. Top 5 Items Sold
     const topItemsData = useMemo(() => {
         const items = {};
-        filteredTransactions.filter(t => t.type === 'sale').forEach(t => {
-            const desc = t.description.trim() || 'Unknown';
-            if (!items[desc]) items[desc] = 0;
-            items[desc] += t.amount;
+        filteredTransactions.filter(t => t.type === 'sale' || t.type === 'order').forEach(t => {
+            if (t.items && Array.isArray(t.items)) {
+                t.items.forEach(item => {
+                    const name = item.name || 'Unknown';
+                    if (!items[name]) items[name] = 0;
+                    items[name] += (Number(item.price || 0) * Number(item.qty || 0));
+                });
+            }
         });
         return Object.entries(items)
             .map(([name, value]) => ({ name, value }))
@@ -136,8 +140,8 @@ const Analytics = ({ setCurrentView }) => {
         let sales = 0;
         let expense = 0;
         filteredTransactions.forEach(t => {
-            if (t.type === 'sale') sales += t.amount;
-            else expense += t.amount;
+            if (t.type === 'sale' || t.type === 'order' || t.type === 'settlement') sales += t.amount;
+            else if (t.type === 'expense') expense += t.amount;
         });
         return [
             { name: 'Sales', value: sales },

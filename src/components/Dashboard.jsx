@@ -4,6 +4,7 @@ import { useTheme } from '../context/useTheme';
 import { useAuth } from '../context/useAuth';
 import TransactionForm from './TransactionForm';
 import Modal from './Modal';
+import { triggerHaptic } from '../utils/haptics';
 import { format } from 'date-fns';
 import { TrendingUp, TrendingDown, Wallet, Trash2, ChevronDown, ChevronUp, ShoppingBag, ShieldAlert } from 'lucide-react';
 
@@ -40,7 +41,7 @@ const Dashboard = () => {
             .sort((a, b) => new Date(b.date) - new Date(a.date)); // Force Newest First
 
         const totalIncome = filteredTransactions
-            .filter(t => t.type === 'sale')
+            .filter(t => t.type === 'sale' || t.type === 'order' || t.type === 'settlement')
             .reduce((acc, curr) => acc + curr.amount, 0);
 
         const totalExpense = filteredTransactions
@@ -68,7 +69,10 @@ const Dashboard = () => {
             {/* Toggle Header for Overview */}
             {(!isInputFocused || dashboardMode !== 'inline') && (
                 <div
-                    onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+                    onClick={() => {
+                        triggerHaptic('light');
+                        setIsOverviewExpanded(!isOverviewExpanded);
+                    }}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -126,7 +130,10 @@ const Dashboard = () => {
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                         <button
-                            onClick={() => handleOpenModal('sale')}
+                            onClick={() => {
+                                triggerHaptic('light');
+                                handleOpenModal('sale');
+                            }}
                             className="btn-premium-hover"
                             style={{
                                 position: 'relative',
@@ -171,7 +178,10 @@ const Dashboard = () => {
                         </button>
 
                         <button
-                            onClick={() => handleOpenModal('expense')}
+                            onClick={() => {
+                                triggerHaptic('light');
+                                handleOpenModal('expense');
+                            }}
                             className="btn-premium-hover"
                             style={{
                                 position: 'relative',
@@ -239,7 +249,10 @@ const Dashboard = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexShrink: 0 }}>
                 <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Recent Activity</h3>
                 <button
-                    onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+                    onClick={() => {
+                        triggerHaptic('light');
+                        setIsOverviewExpanded(!isOverviewExpanded);
+                    }}
                     className="btn"
                     style={{ padding: '4px 8px', color: 'var(--color-text-muted)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
@@ -305,9 +318,9 @@ const Dashboard = () => {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <div style={{
                                             fontWeight: '600',
-                                            color: t.type === 'sale' ? 'var(--color-success)' : 'var(--color-danger)'
+                                            color: (t.type === 'sale' || t.type === 'order' || t.type === 'settlement') ? 'var(--color-success)' : 'var(--color-danger)'
                                         }}>
-                                            {t.type === 'sale' ? '+' : '-'}₹{Number(t.amount)}
+                                            {(t.type === 'sale' || t.type === 'order' || t.type === 'settlement') ? '+' : '-'}₹{Number(t.amount)}
                                         </div>
                                         <button
                                             onClick={() => handleDeleteClick(t.id)}

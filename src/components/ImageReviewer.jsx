@@ -24,9 +24,8 @@ const ImageReviewer = ({ file, onConfirm, onCancel }) => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
 
-        // Scale down large images for performance if needed, but keeping full quality for now
-        // Max Dimension 800px to keep it snappy
-        const maxDim = 800;
+        // Limit size to stay under 1MB Firestore limit
+        const maxDim = 600;
         let w = img.width;
         let h = img.height;
 
@@ -43,7 +42,7 @@ const ImageReviewer = ({ file, onConfirm, onCancel }) => {
 
     const saveState = () => {
         const canvas = canvasRef.current;
-        setHistory(prev => [...prev.slice(-9), canvas.toDataURL()]); // Keep last 10 states
+        setHistory(prev => [...prev.slice(-9), canvas.toDataURL('image/jpeg', 0.8)]); // Keep last 10 states as JPEG
     };
 
     const handleUndo = () => {
@@ -84,12 +83,8 @@ const ImageReviewer = ({ file, onConfirm, onCancel }) => {
 
         if (targetA === 0) return; // Already transparent
 
-        // Simple Color Distance (Flood Fill is complex, let's do global color keying usually preferred for white backgrounds)
-        // Actually, user said "simple code". A global color replace is simplest and works best for studio shots (white/green screens).
-        // Let's perform a Global Color Erasure with tolerance.
-
+        // Global Color Erasure with tolerance
         for (let i = 0; i < data.length; i += 4) {
-            // Check Alpha
             if (data[i + 3] === 0) continue;
 
             const r = data[i];
@@ -108,7 +103,8 @@ const ImageReviewer = ({ file, onConfirm, onCancel }) => {
     };
 
     const handleSave = () => {
-        const url = canvasRef.current.toDataURL('image/png');
+        // Force conversion to JPEG with 0.7 quality to ensure small size
+        const url = canvasRef.current.toDataURL('image/jpeg', 0.7);
         onConfirm(url);
     };
 

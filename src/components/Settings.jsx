@@ -380,7 +380,7 @@ const Settings = ({ onClose }) => {
             )}
 
             <div style={{ padding: '24px', textAlign: 'center', opacity: 0.3 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>TCC App v1.2.0</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>TCC App v1.2.1</div>
                 <div style={{ fontSize: '0.7rem' }}>© 2026 The Classic Confection</div>
             </div>
         </div>

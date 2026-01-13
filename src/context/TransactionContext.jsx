@@ -55,15 +55,20 @@ export const TransactionProvider = ({ children }) => {
 
     const addTransaction = async (transaction) => {
         try {
-            await addDoc(collection(db, 'transactions'), {
-                ...transaction,
-                date: transaction.date || new Date().toISOString(), // Use provided date or new
+            // Remove undefined fields to prevent Firestore crashes
+            const cleanTransaction = JSON.parse(JSON.stringify(transaction));
+
+            const docRef = await addDoc(collection(db, 'transactions'), {
+                ...cleanTransaction,
+                date: cleanTransaction.date || new Date().toISOString(), // Use provided date or new
                 createdAt: new Date().toISOString()
             });
             // Silent success (User requested removal of notification)
+            return docRef;
         } catch (error) {
             console.error("Error adding transaction:", error);
-            showToast("Failed to add transaction. Check connection.", "error");
+            showToast(`Failed: ${error.message}`, "error");
+            throw error;
         }
     };
 

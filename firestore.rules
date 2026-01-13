@@ -62,5 +62,15 @@ service cloud.firestore {
       allow update: if isStaff() && isValidTransaction();
     }
     
+    // 3. Inventory Items (Menu)
+    match /inventory_items/{itemId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // 4. Customers Directory (CRM)
+    match /customers/{phone} {
+      allow read, write: if isStaff();
+    }
+    
   }
 }

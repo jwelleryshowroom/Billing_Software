@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useInstall } from '../context/useInstall';
+import { triggerHaptic } from '../utils/haptics';
 
 const Modal = ({ isOpen, onClose, title, children, zIndex = 10000 }) => {
     const { isStandalone } = useInstall();
@@ -17,7 +19,7 @@ const Modal = ({ isOpen, onClose, title, children, zIndex = 10000 }) => {
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div style={{
             position: 'fixed',
             inset: 0,
@@ -79,7 +81,10 @@ const Modal = ({ isOpen, onClose, title, children, zIndex = 10000 }) => {
                         {title}
                     </h2>
                     <button
-                        onClick={onClose}
+                        onClick={() => {
+                            triggerHaptic('hover');
+                            onClose();
+                        }}
                         style={{
                             background: 'transparent',
                             border: 'none',
@@ -123,7 +128,8 @@ const Modal = ({ isOpen, onClose, title, children, zIndex = 10000 }) => {
                 /* Mobile Bottom Sheet Styles REMOVED in favor of Top Align */
                 
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 };
 
