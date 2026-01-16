@@ -4,7 +4,7 @@ import { useAuth } from '../context/useAuth';
 import { useInstall } from '../context/useInstall';
 import { useSettings } from '../context/SettingsContext';
 import RoleInfoModal from './RoleInfoModal';
-import { Settings as SettingsIcon, Layout, Smartphone, MousePointer2, Eye, Smile, X, Monitor, Info, Database, Check } from 'lucide-react';
+import { Settings as SettingsIcon, Layout, Trophy, Smartphone, MousePointer2, Eye, Smile, X, Monitor, Info, Database, Check } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,6 +17,7 @@ const SettingsDrawer = () => {
         menuBarMode, setMenuBarMode,
         iconStyle, setIconStyle,
         showMenuLabels, setShowMenuLabels,
+        showMilestoneModal, setShowMilestoneModal,
         isSettingsOpen, closeSettings,
         openData
     } = useSettings();
@@ -379,6 +380,32 @@ const SettingsDrawer = () => {
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                                     }}
                                 />
+                            </div>
+                            {/* Sales Popups */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderTop: `1px solid ${borderColor}` }}>
+                                <div>
+                                    <div style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>Sales Popups</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Celebrate milestones with confetti</div>
+                                </div>
+                                <div
+                                    onClick={() => setShowMilestoneModal(!showMilestoneModal)}
+                                    style={{
+                                        width: '44px', height: '24px',
+                                        background: showMilestoneModal ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                                        borderRadius: '12px',
+                                        position: 'relative', cursor: 'pointer',
+                                        transition: 'background 0.3s'
+                                    }}
+                                >
+                                    <motion.div
+                                        animate={{ x: showMilestoneModal ? 22 : 2 }}
+                                        style={{
+                                            width: '20px', height: '20px', background: 'white', borderRadius: '50%',
+                                            position: 'absolute', top: '2px',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -10,66 +10,101 @@ export const useSettings = () => {
     return context;
 };
 
+// Default Configurations
+const DEFAULT_MOBILE_SETTINGS = {
+    menuBarMode: 'disappearing',
+    iconStyle: 'emoji',
+    showMenuLabels: false,
+    showMilestoneModal: true,
+    homeLayoutMode: 'bento' // Legacy, mostly unused on mobile but good to have
+};
+
+const DEFAULT_DESKTOP_SETTINGS = {
+    menuBarMode: 'disappearing',
+    iconStyle: 'emoji',
+    showMenuLabels: true,
+    showMilestoneModal: true,
+    homeLayoutMode: 'bento'
+};
+
 export const SettingsProvider = ({ children }) => {
-    // Menu Bar Mode: 'sticky' | 'disappearing'
-    const [menuBarMode, setMenuBarMode] = useState(() => {
-        return localStorage.getItem('menuBarMode') || 'sticky';
+    // 1. Device Detection
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // 2. Load Profiles from LocalStorage
+    const [mobileSettings, setMobileSettings] = useState(() => {
+        const saved = localStorage.getItem('settings_mobile');
+        return saved ? { ...DEFAULT_MOBILE_SETTINGS, ...JSON.parse(saved) } : DEFAULT_MOBILE_SETTINGS;
     });
 
-    // Icon Style: 'mono' | 'emoji'
-    const [iconStyle, setIconStyle] = useState(() => {
-        return localStorage.getItem('iconStyle') || 'emoji';
+    const [desktopSettings, setDesktopSettings] = useState(() => {
+        const saved = localStorage.getItem('settings_desktop');
+        return saved ? { ...DEFAULT_DESKTOP_SETTINGS, ...JSON.parse(saved) } : DEFAULT_DESKTOP_SETTINGS;
     });
 
-    // Show Labels: boolean
-    const [showMenuLabels, setShowMenuLabels] = useState(() => {
-        const saved = localStorage.getItem('showMenuLabels');
-        return saved !== null ? JSON.parse(saved) : true;
-    });
+    // 3. Persist Changes
+    useEffect(() => {
+        localStorage.setItem('settings_mobile', JSON.stringify(mobileSettings));
+    }, [mobileSettings]);
 
-    // Global Settings Drawer Visibility
-    const [isSettingsOpen, setIsSettingsOpen] = useState(() => {
-        const saved = localStorage.getItem('isSettingsOpen');
+    useEffect(() => {
+        localStorage.setItem('settings_desktop', JSON.stringify(desktopSettings));
+    }, [desktopSettings]);
+
+    // 4. Resolve Current Settings based on Device
+    const currentSettings = isMobile ? mobileSettings : desktopSettings;
+    const updateSettings = isMobile ? setMobileSettings : setDesktopSettings;
+
+    // Helper to update specific key
+    const updateSetting = (key, value) => {
+        updateSettings(prev => ({ ...prev, [key]: value }));
+    };
+
+    // 5. Global / Shared Settings (NOT device specific)
+    const [hapticDebug, setHapticDebug] = useState(() => {
+        const saved = localStorage.getItem('hapticDebug');
         return saved !== null ? JSON.parse(saved) : false;
     });
+
+    useEffect(() => {
+        localStorage.setItem('hapticDebug', JSON.stringify(hapticDebug));
+    }, [hapticDebug]);
+
+    // Drawer States (Ephemeral)
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const openSettings = () => setIsSettingsOpen(true);
     const closeSettings = () => setIsSettingsOpen(false);
 
-    // Haptic Debug Mode: boolean
-    const [hapticDebug, setHapticDebug] = useState(() => {
-        const saved = localStorage.getItem('hapticDebug');
-        return saved !== null ? JSON.parse(saved) : false; // Default to false (hidden)
-    });
-
-    // Global Data Drawer Visibility
     const [isDataOpen, setIsDataOpen] = useState(false);
     const openData = () => setIsDataOpen(true);
     const closeData = () => setIsDataOpen(false);
 
-    // Desktop Layout Mode: 'bento' | 'simple'
-    const [homeLayoutMode, setHomeLayoutMode] = useState(() => {
-        return localStorage.getItem('homeLayoutMode') || 'bento';
-    });
-
-    // Track Nav Visibility (Shared State for Floating Layouts)
     const [navVisible, setNavVisible] = useState(true);
 
-    useEffect(() => {
-        localStorage.setItem('menuBarMode', menuBarMode);
-        localStorage.setItem('iconStyle', iconStyle);
-        localStorage.setItem('showMenuLabels', JSON.stringify(showMenuLabels));
-        localStorage.setItem('hapticDebug', JSON.stringify(hapticDebug));
-        localStorage.setItem('isSettingsOpen', JSON.stringify(isSettingsOpen));
-        localStorage.setItem('homeLayoutMode', homeLayoutMode);
-    }, [menuBarMode, iconStyle, showMenuLabels, hapticDebug, isSettingsOpen, homeLayoutMode]);
-
     const value = {
-        menuBarMode,
-        setMenuBarMode,
-        iconStyle,
-        setIconStyle,
-        showMenuLabels,
-        setShowMenuLabels,
+        // Exposed Values (Proxied to current profile)
+        menuBarMode: currentSettings.menuBarMode,
+        setMenuBarMode: (val) => updateSetting('menuBarMode', val),
+
+        iconStyle: currentSettings.iconStyle,
+        setIconStyle: (val) => updateSetting('iconStyle', val),
+
+        showMenuLabels: currentSettings.showMenuLabels,
+        setShowMenuLabels: (val) => updateSetting('showMenuLabels', val),
+
+        showMilestoneModal: currentSettings.showMilestoneModal,
+        setShowMilestoneModal: (val) => updateSetting('showMilestoneModal', val),
+
+        homeLayoutMode: currentSettings.homeLayoutMode,
+        setHomeLayoutMode: (val) => updateSetting('homeLayoutMode', val),
+
+        // Global
         hapticDebug,
         setHapticDebug,
         isSettingsOpen,
@@ -78,10 +113,11 @@ export const SettingsProvider = ({ children }) => {
         isDataOpen,
         openData,
         closeData,
-        homeLayoutMode,
-        setHomeLayoutMode,
         navVisible,
-        setNavVisible
+        setNavVisible,
+
+        // Meta
+        isMobile
     };
 
     return (

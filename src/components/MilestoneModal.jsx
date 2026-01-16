@@ -1,13 +1,15 @@
 
 import React from 'react';
 import { useMilestone } from '../context/MilestoneContext';
+import { useSettings } from '../context/SettingsContext'; // [NEW]
 import { Trophy, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 const MilestoneModal = () => {
     const { celebration, closeCelebration } = useMilestone();
+    const { showMilestoneModal } = useSettings(); // [NEW] Consume setting
 
-    if (!celebration) return null;
+    if (!celebration || !showMilestoneModal) return null; // [CHANGED] Check setting
 
     const { milestone, daysTaken, totalAmount } = celebration;
 
