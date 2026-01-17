@@ -165,7 +165,7 @@ const Orders = () => {
                             flex: 1,
                             overflowY: 'auto',
                             paddingBottom: '120px',
-                            paddingTop: '2px',
+                            paddingTop: '16px',
                             marginBottom: '0',
                             display: isMobile ? 'block' : 'grid',
                             gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',

@@ -15,15 +15,15 @@ const DEFAULT_MOBILE_SETTINGS = {
     menuBarMode: 'disappearing',
     iconStyle: 'emoji',
     showMenuLabels: false,
-    showMilestoneModal: true,
-    homeLayoutMode: 'bento' // Legacy, mostly unused on mobile but good to have
+    showMilestoneModal: false, // Changed to OFF by default
+    homeLayoutMode: 'bento'
 };
 
 const DEFAULT_DESKTOP_SETTINGS = {
     menuBarMode: 'disappearing',
     iconStyle: 'emoji',
     showMenuLabels: true,
-    showMilestoneModal: true,
+    showMilestoneModal: false, // Changed to OFF by default
     homeLayoutMode: 'bento'
 };
 

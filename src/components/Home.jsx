@@ -34,12 +34,12 @@ const Home = () => {
 
     const navigate = useNavigate();
 
-    // Desktop Detection
+    // Desktop & Tablet Detection (768px+ uses desktop home layout)
     const { homeLayoutMode } = useSettings();
-    const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024);
+    const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
 
     React.useEffect(() => {
-        const checkDesktop = () => setIsDesktop(window.innerWidth > 1024);
+        const checkDesktop = () => setIsDesktop(window.innerWidth > 768);
         window.addEventListener('resize', checkDesktop);
         return () => window.removeEventListener('resize', checkDesktop);
     }, []);

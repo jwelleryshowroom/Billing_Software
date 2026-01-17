@@ -126,13 +126,13 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <InstallProvider>
-          <ToastProvider>
-            <ThemeProvider>
+          <ThemeProvider>
+            <ToastProvider>
               <ErrorBoundaryWrapper>
                 <AppContent />
               </ErrorBoundaryWrapper>
-            </ThemeProvider>
-          </ToastProvider>
+            </ToastProvider>
+          </ThemeProvider>
         </InstallProvider>
       </AuthProvider>
     </BrowserRouter>
